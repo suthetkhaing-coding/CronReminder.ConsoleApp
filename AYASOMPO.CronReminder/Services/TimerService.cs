@@ -1,52 +1,53 @@
 ﻿using RestSharp;
 using System.Threading;
 using System.Timers;
+using Timer = System.Threading.Timer;
 
 namespace AYASOMPO.CronReminder.Services
 {
     public class TimerService
     {
-        private System.Timers.Timer aTimer;
+        private Timer _timer;
         private List<string>? _urls;
 
-        public void SetTimer(List<string> urls, int time)
+        public void SetTimer(List<string> urls, int minute)
         {
             _urls = urls;
 
-            time = (int)TimeSpan.FromMinutes(time).TotalMilliseconds;
-            // Create a timer with a two second interval.
-            aTimer = new System.Timers.Timer(time);
-            // Hook up the Elapsed event for the timer. 
-            //aTimer.Elapsed += OnTimedEvent;
-            //aTimer.AutoReset = true;
-            //aTimer.Enabled = true;
+            int interval = minute * 60 * 1000;
 
-            for (int i = 0; i < urls.Count; i++)
+            _timer = new Timer(OnTimedEvent, null, TimeSpan.Zero, TimeSpan.FromMinutes(minute));
+        }
+
+        private async void OnTimedEvent(object state)
+        {
+            if (_urls != null)
             {
-                aTimer.Elapsed += (sender, e) => OnTimedEvent(urls[i], e);
-                aTimer.AutoReset = true;
-                aTimer.Enabled = true;
-                //aTimer.Add(timer);
+                foreach (var url in _urls)
+                {
+                    await MakeRequest(url);
+                }
             }
         }
 
-        private async void OnTimedEvent(string url, ElapsedEventArgs e)
+        private async Task MakeRequest(string url)
         {
             RestClient client = new RestClient();
             RestRequest request = new RestRequest(url, Method.Get);
             var response = await client.GetAsync(request);
+            //var response = await client.ExecuteAsync(request); //HTTP requests (GET, POST, PUT, etc.)
 
             if (response.IsSuccessful)
                 Console.WriteLine(response.StatusCode);
             else
                 Console.WriteLine($"Error: {response.StatusCode}");
 
-            Console.WriteLine($"The Elapsed event for {url} was raised at {e.SignalTime:HH:mm:ss.fff}");
+            Console.WriteLine($"Request made to {url} at {DateTime.Now:HH:mm:ss.fff}");
         }
 
         public void Dispose()
         {
-            aTimer.Dispose();
+            _timer.Dispose();
         }
 
         #region for One Url(Not Used)
