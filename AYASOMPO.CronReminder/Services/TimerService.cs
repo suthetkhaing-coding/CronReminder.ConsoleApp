@@ -33,9 +33,8 @@ namespace AYASOMPO.CronReminder.Services
         private async Task MakeRequest(string url)
         {
             RestClient client = new RestClient();
-            RestRequest request = new RestRequest(url, Method.Get);
-            var response = await client.GetAsync(request);
-            //var response = await client.ExecuteAsync(request); //HTTP requests (GET, POST, PUT, etc.)
+            RestRequest request = new RestRequest(url, Method.Get); //HTTP requests (GET, POST, PUT, etc.)
+            var response = await client.ExecuteAsync(request); 
 
             if (response.IsSuccessful)
                 Console.WriteLine(response.StatusCode);
