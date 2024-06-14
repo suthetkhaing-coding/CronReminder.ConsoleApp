@@ -1,0 +1,11 @@
+//CRM 
+http://localhost:8031
+
+// FTP Server
+http://localhost:8086
+
+// Highway Travel
+http://localhost:8087
+
+
+
